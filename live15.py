@@ -11,7 +11,8 @@ from api import AlpacaPaperDataAPI, AlpacaPaperTradingAPI
 ## APIs
 
 # Alpaca
-bars_api = AlpacaPaperDataAPI("/v1/bars/")
+daily_bars_api = AlpacaPaperDataAPI("/v1/bars/1D")
+min15_bars_api = AlpacaPaperDataAPI("/v1/bars/15Min")
 calendar_api = AlpacaPaperTradingAPI("/v2/calendar")
 
 eastern = pytz.timezone('America/New_York')
@@ -45,4 +46,3 @@ while (True):
         # if any have a good second bar, determine entry point
 
         # place orders
-        
