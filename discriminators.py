@@ -1,5 +1,7 @@
 # Discriminators to be used with scanners to filter out stocks
 
+import sys
+
 class Discriminator:
     """Base Discriminator Class"""
 
@@ -19,7 +21,11 @@ class DailyGapDiscriminator(Discriminator):
 
     def run(self):
         for ticker in self.tickers:
-            mean_high = self.dfs[ticker]["df"]["h"][:-1].mean()
+            try:
+                mean_high = self.dfs[ticker]["df"]["h"][:-1].mean()
+            except:
+                print(ticker, self.dfs[ticker])
+                sys.exit()
             standard_deviation = self.dfs[ticker]["df"]["h"][:-1].std()
 
             # determine if price is abnormally high
@@ -73,7 +79,7 @@ class Min151stBarDiscriminator(Discriminator):
             # b. turns a pivot
 
             # determine if bar size is abnormally large
-            if self.dfs[ticker]["df"]["bs"].iloc[-1] - mean_bar_size > 2 * std_bar_size:
+            if self.dfs[ticker]["df"]["bs"].iloc[-1] > 2 * mean_bar_size:
                 wr_bar = True
 
             # determine if bar has increased volume

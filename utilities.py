@@ -2,6 +2,7 @@
 
 # API calling helper functions
 from urllib.request import Request, urlopen
+import requests
 import json
 
 def get_json_parsed_data(url):
@@ -32,3 +33,7 @@ def get_json_parsed_data_with_headers(url, headers):
     req = Request(url, headers=headers)
     data = urlopen(req).read()
     return json.loads(data)
+
+def get_json_parsed_data_with_headers_and_params(url, querydict, headers):
+    response = requests.request("GET", url, headers=headers, params=querydict)
+    return json.loads(response.text)

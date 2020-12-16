@@ -8,6 +8,8 @@ import time
 import pytz
 import pandas as pd
 
+import sys
+
 from discriminators import DailyGapDiscriminator, Min151stBarDiscriminator
 
 class Scanner:
@@ -49,6 +51,8 @@ class AlpacaPaperDailyGapScanner(AlpacaPaperScanner):
         url = self._API_BASE_URL + self._ENDPOINT + self._TIMEFRAME + "?limit=100&symbols=" + ",".join(self.tickers)
         headers = {"APCA-API-KEY-ID": self._API_KEY_ID, "APCA-API-SECRET-KEY": self._API_KEY}
 
+        print(url)
+
         # get request
         data = get_json_parsed_data_with_headers(url, headers)
         dfs = {}
@@ -57,9 +61,14 @@ class AlpacaPaperDailyGapScanner(AlpacaPaperScanner):
         for ticker in self.tickers:
             ticker_lst = []
             for bar in data[ticker]:
-                bar["t"] = time.strftime("%b %d %Y", time.gmtime(bar["t"]))
-
                 bar_copy = dict(bar)
+
+                try:
+                    bar_copy["t"] = time.strftime("%b %d %Y", time.gmtime(bar["t"]))
+                except:
+                    print(ticker, bar, bar["t"])
+                    sys.exit()
+
                 bar_copy["ticker"] = ticker
                 bar_copy["bs"] = bar_copy["h"] - bar_copy["l"]
 
