@@ -77,3 +77,26 @@ class AlpacaPaperTradingAPI(AlpacaAPI):
 
     def __init__(self, endpoint):
         super().__init__(conf.ALPACA_PAPER_API_KEY_ID, conf.ALPACA_PAPER_API_SECRET_KEY, conf.ALPACA_PAPER_BASE_TRADING_URL, endpoint)
+
+    def create_bracket_order(self, symbol, qty, entry, take, stop):
+        headers = {"APCA-API-KEY-ID": self._API_KEY_ID, "APCA-API-SECRET-KEY": self._API_KEY}
+        url = self._API_BASE_URL + self._ENDPOINT
+        data = {
+            "symbol": symbol,
+            "qty": qty,
+            "side": "buy",
+            "type": "limit",
+            "time_in_force": "day",
+            "limit_price": entry,
+            "order_class": "bracket",
+            "take_profit": {
+                "limit_price": take
+            },
+            "stop_loss": {
+                "stop_price": stop
+            }
+        }
+
+        response = requests.post(url, json=data, headers=headers)
+
+        return json.loads(response.content)

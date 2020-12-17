@@ -1,99 +1,44 @@
-# Discriminators to be used with scanners to filter out stocks
+# Discriminators to be used to determine if a stocks bars have a specific quality
 
-import sys
+def has_gap(bars_df):
+    mean_high   = bars_df["h"][:-1].mean()
+    std_high    = bars_df["h"][:-1].std()
 
-class Discriminator:
-    """Base Discriminator Class"""
+    if bars_df["h"].iloc[-1] - mean_high > 1.25 * std_high:
+        return True
+    return False
 
-    def __init__(self, title, tickers, dataframes):
-        self.title = title
-        self.tickers = tickers
-        self.dfs = dataframes
+def has_igniting_bar(bars_df):
+    # use donchian channel until pivots are necessary
+    donchian_high = bars_df["h"].tail(41)[:-1].max()
+    donchian_low = bars_df["l"].tail(41)[:-1].min()
+    donchian_gap = donchian_high - donchian_low
 
-    def run(self):
-        pass
+    if bars_df["h"].iloc[-1] > donchian_high + (donchian_channel_size * 0.5):
+        return True
+    return False
 
-class DailyGapDiscriminator(Discriminator):
-    """Discriminator to determine if stock has a wide daily gap"""
+def has_wide_bar(bars_df):
+    mean_bar_size = bars_df["bs"][:-1].mean()
 
-    def __init__(self, tickers, dataframes):
-        super().__init__("hasDailyGap", tickers, dataframes)
+    if bars_df["bs"].iloc[-1] > 2 * mean_bar_size:
+        return True
+    return False
 
-    def run(self):
-        for ticker in self.tickers:
-            try:
-                mean_high = self.dfs[ticker]["df"]["h"][:-1].mean()
-            except:
-                print(ticker, self.dfs[ticker])
-                sys.exit()
-            standard_deviation = self.dfs[ticker]["df"]["h"][:-1].std()
+def has_increased_volume(bars_df):
+    mean_volume = bars_df["v"][:-1].mean()
+    std_volume = bars_df["v"][:-1].std()
 
-            # determine if price is abnormally high
-            if self.dfs[ticker]["df"]["h"].iloc[-1] - mean_high > 1.25 * standard_deviation:
-                self.dfs[ticker][self.title] = True
-            else:
-                self.dfs[ticker][self.title] = False
+    if bars_df["v"].iloc[-1] - mean_volume > 1.5 * std_volume:
+        return True
+    return False
 
-        return self.dfs
+def has_positive_move(bars_df):
+    if bars_df["c"].iloc[-1] > bars_df["o"].iloc[-1]:
+        return True
+    return False
 
-class Min151stBarDiscriminator(Discriminator):
-    """Discriminator to determine if stock has a first igniting bar"""
-
-    def __init__(self, tickers, dataframes):
-        super().__init__("has15Min1stBar", tickers, dataframes)
-
-    def run(self):
-        for ticker in self.tickers:
-            mean_bar_size = self.dfs[ticker]["df"]["bs"][:-1].mean()
-            std_bar_size = self.dfs[ticker]["df"]["bs"][:-1].std()
-
-            mean_volume = self.dfs[ticker]["df"]["v"][:-1].mean()
-            std_volume = self.dfs[ticker]["df"]["v"][:-1].std()
-
-            last_bar = self.dfs[ticker]["df"].iloc[-1]
-
-            # use Donchian Channel n=20 to find decent resistance
-            donchian_high = self.dfs[ticker]["df"]["h"].tail(41)[:-1].max()
-            donchian_low = self.dfs[ticker]["df"]["l"].tail(41)[:-1].min()
-            donchian_channel_size = donchian_high - donchian_low
-
-            # print(ticker+":")
-            # print("Channel Size", donchian_channel_size, "High", donchian_high, "Low", donchian_low)
-            # print("Bar Size", self.dfs[ticker]["df"]["bs"].iloc[-1])
-
-            # 3 step process to determine if bar is a proper 1st bar
-            # 1. First bar of move
-            first_bar = False
-            # 2. Wide range bar (abnormally large)
-            wr_bar = False
-            # 3. Increased volume
-            inc_volume = False
-            # 4. (extra) should be bullish direction since not shorting
-            positive = False
-
-            # determine if first bar of move
-            # move happens in 2 ways
-            # a. moves above the resistance
-            if last_bar['h'] > donchian_high + (donchian_channel_size * 0.5):
-                first_bar = True
-            # b. turns a pivot
-
-            # determine if bar size is abnormally large
-            if self.dfs[ticker]["df"]["bs"].iloc[-1] > 2 * mean_bar_size:
-                wr_bar = True
-
-            # determine if bar has increased volume
-            if last_bar["v"] - mean_volume > 1.5 * std_volume:
-                inc_volume = True
-
-            # determine if bar is positive
-            if last_bar["c"] > last_bar["o"]:
-                positive = True
-
-            if first_bar and wr_bar and inc_volume and positive:
-                self.dfs[ticker][self.title] = True
-            else:
-                self.dfs[ticker][self.title] = False
-
-
-        return self.dfs
+def has_good_1st_bar(bars_df):
+    if has_igniting_bar(bars_df) and has_wide_bar(bars_df) and has_increased_volume(bars_df) and has_positive_move(bars_df):
+        return True
+    return False
