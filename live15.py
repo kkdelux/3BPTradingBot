@@ -46,8 +46,9 @@ prevtime = datetime.datetime.now().astimezone(eastern)
 # Tickers data structure
 tickers = {
     "Pre": [],      # Premarket top tickers
-    "1st": [],      # Tickers that pass the first bar check
-    "2nd": [],      # Tickers that pass the second bar check
+    "1st": [],      # Tickers that have a gap
+    "2nd": [],      # Tickers that have a good first bar
+    "Ord": []       # Tickers that have a good second bar
 }
 
 # Bars data structure
@@ -77,6 +78,9 @@ orders = []
 
 # Traded for the day?
 traded = False
+check_930 = False
+check_945 = False
+check_1000 = False
 # main loop
 # print(daily_bars_api.get_json({"symbols": ",".join(["AAPL", "TSLA"])}))
 while (True):
@@ -89,12 +93,17 @@ while (True):
         today = datetime.datetime.today().astimezone(eastern)
 
         # update times
+        times["00:00"] = datetime.datetime.today().astimezone(eastern). replace(hour=0, minute=0, second=0, microsecond=0)
         times["9:30"] = datetime.datetime.today().astimezone(eastern).replace(hour=9, minute=30, second=0, microsecond=0)
         times["9:45"] = datetime.datetime.today().astimezone(eastern).replace(hour=9, minute=45, second=0, microsecond=0)
         times["10:00"] = datetime.datetime.today().astimezone(eastern). replace(hour=10, minute=0, second=0, microsecond=0)
 
         # updated traded for the day
         traded = False
+        # updated time checks for the day
+        check_930 = False
+        check_945 = False
+        check_1000 = False
 
     # determine if the market is open today
     calendar_dt = today.strftime("%Y-%m-%d")
@@ -102,7 +111,7 @@ while (True):
 
     if is_open and not traded:
         # if time is >= 9:30 AM New York time, collect premarket top gainers
-        if currenttime >= times["9:30"] and currenttime < times["10:00"]:
+        if currenttime >= times["9:30"] and currenttime < times["9:45"] and not check_930:
             print("Current Time greater than 9:30")
             # collect premarket top gainers
             tickers["Pre"] = populator.populate().get_tickers()
@@ -120,10 +129,12 @@ while (True):
                     # if gap append to tickers["1st"] for the next check
                     tickers["1st"].append(ticker)
 
+            check_930 = True
+
 
         # if time is >= 9:45 AM New York time, collect first 15 min bar from premarket top gainers
         # determine if any of the premarket gainers have a good first bar
-        if currenttime >= times["9:45"] and currenttime < times["10:00"]:
+        if currenttime >= times["9:45"] and currenttime < times["10:00"] and not check_945:
             print("Current Time greater than 9:45")
             # determine if any of the premarket tickers have a good first bar
             if tickers["1st"]:
@@ -146,6 +157,8 @@ while (True):
                     if ds.has_good_1st_bar(bars["1st"][ticker]):
                         tickers["2nd"].append(ticker)
 
+            check_945 = True
+
         # if time is >= 10:00 AM New York time, collect second 15 min bar from premarket top gainers
         # determine if any of the premarket gainers with a good first bar, have a good second bar
         if currenttime >= times["10:00"]:
@@ -153,17 +166,26 @@ while (True):
             sys.exit()
             # determine if tickers with good first bar have good second bar
 
-        # if any have a good second bar, determine entry point
-        if tickers["2nd"]:
+            # get second bar
+            # check to see if second bar is good
             for ticker in tickers["2nd"]:
+                if ds.has_good_2nd_bar(bars["2nd"][ticker]):
+                    # populate tickers["Ord"]
+                    tickers["Ord"].append(ticker)
+
+            check_1000 = True
+
+        # if any have a good second bar, determine entry point
+        if tickers["Ord"]:
+            for ticker in tickers["Ord"]:
                 # get balance
                 balance = float(account_api.get_json()["cash"])
                 # determine entry point
-                high = bars["2nd"][ticker]["bars"]["h"].tail(2).max()
+                high = bars["2nd"][ticker]["h"].tail(2).max()
                 high_100 = int(high * 100)
                 entry = (high_100 + (5 - (high_100 % 5))) / 100
                 # determine stop
-                stop = bars["2nd"][ticker]["bars"]["l"].iloc[-1]
+                stop = bars["2nd"][ticker]["l"].iloc[-1]
                 # determine take profit
                 take = entry + (rr * (entry - stop))
                 # determine quantity
@@ -189,5 +211,10 @@ while (True):
         tickers["Pre"] = tickers["Pre"].clear()
         tickers["1st"] = tickers["1st"].clear()
         tickers["2nd"] = tickers["2nd"].clear()
+        tickers["Ord"] = tickers["Ord"].clear()
+
+        bars["Pre"] = bars["Pre"].clear()
+        bars["1st"] = bars["1st"].clear()
+        bars["2nd"] = bars["2nd"].clear()
 
         orders.clear()
