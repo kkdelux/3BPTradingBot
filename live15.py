@@ -3,6 +3,10 @@
 
 import sys
 # imports
+import logging
+logging.basicConfig(filename='live15.log', level=logging.DEBUG)
+
+import time
 import pytz
 import datetime
 
@@ -84,7 +88,7 @@ check_930 = False
 check_945 = False
 check_1000 = False
 # main loop
-print("Starting Live Trading Application at " + __file__ + "." + __name__)
+logging.info("Starting Live Trading Application at " + __file__ + "." + __name__)
 while (True):
     # update current time
     currenttime = datetime.datetime.now().astimezone(eastern)
@@ -94,7 +98,7 @@ while (True):
         # new day
         today = datetime.datetime.today().astimezone(eastern)
 
-        print("DateTime Event -- Today is: " + today.strftime("%Y %m %d"))
+        logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d"))
 
         # update times
         times["00:00"] = datetime.datetime.today().astimezone(eastern). replace(hour=0, minute=0, second=0, microsecond=0)
@@ -116,7 +120,6 @@ while (True):
     if is_open and not traded:
         # if time is >= 9:30 AM New York time, collect premarket top gainers
         if currenttime >= times["9:30"] and currenttime < times["9:45"] and not check_930:
-            print("Current Time greater than 9:30")
             # collect premarket top gainers
             tickers["Pre"] = populator.populate().get_tickers()
 
@@ -139,7 +142,6 @@ while (True):
         # if time is >= 9:45 AM New York time, collect first 15 min bar from premarket top gainers
         # determine if any of the premarket gainers have a good first bar
         if currenttime >= times["9:45"] and currenttime < times["10:00"] and not check_945:
-            print("Current Time greater than 9:45")
             # determine if any of the premarket tickers have a good first bar
             if tickers["1st"]:
                 # collect 15 min bars
@@ -167,8 +169,6 @@ while (True):
         # if time is >= 10:00 AM New York time, collect second 15 min bar from premarket top gainers
         # determine if any of the premarket gainers with a good first bar, have a good second bar
         if currenttime >= times["10:00"]:
-            print("Current time greater than 10:00")
-            sys.exit()
             # determine if tickers with good first bar have good second bar
             if tickers["2nd"]:
                 # collect second 15 min bar
@@ -221,7 +221,7 @@ while (True):
                     # place order
                     orders_api.create_bracket_order(order["symbol"], order["qty"], order["entry"], order["take"], order["stop"])
 
-                    print(datetime.datetime.now().astimezone(eastern).strftime("%Y %m %d %H:%M:%S") + " - Order placed for " + order["symbol"] + " x" + order["qty"])
+                    logging.info(datetime.datetime.now().astimezone(eastern).strftime("%Y %m %d %H:%M:%S") + " - Order placed for " + order["symbol"] + " x" + order["qty"])
 
                     orders.append(order)
 
@@ -239,3 +239,5 @@ while (True):
         bars["2nd"] = bars["2nd"].clear()
 
         orders.clear()
+
+    time.sleep(10)
