@@ -6,6 +6,8 @@ import sys
 import pytz
 import datetime
 
+import pandas as pd
+
 import discriminators as ds
 from api import AlpacaPaperDataAPI, AlpacaPaperTradingAPI
 from populator import YahooPopulator
@@ -147,7 +149,8 @@ while (True):
                         dt = datetime.datetime.fromtimestamp(bar["t"]).astimezone(eastern)
                         # remove premarket bars
                         if dt >= times["00:00"] and dt < times["9:30"]:
-                            bars_swap.append(bar)
+                            continue
+                        bars_swap.append(bar)
 
                     bars["1st"][ticker] = pd.DataFrame(bars_swap)
                     bars["1st"][ticker]["bs"] = bars["1st"][ticker]["h"] - bars["1st"][ticker]["l"]
@@ -165,13 +168,27 @@ while (True):
             print("Current time greater than 10:00")
             sys.exit()
             # determine if tickers with good first bar have good second bar
+            if tickers["2nd"]:
+                # collect second 15 min bar
+                raw_data = min15_bars_api.get_json({"symbols": ",".join(tickers["2nd"])})
 
-            # get second bar
-            # check to see if second bar is good
-            for ticker in tickers["2nd"]:
-                if ds.has_good_2nd_bar(bars["2nd"][ticker]):
-                    # populate tickers["Ord"]
-                    tickers["Ord"].append(ticker)
+                for ticker in tickers["2nd"]:
+                    bars_swap = []
+                    for bar in raw_data[ticker]:
+                        dt = datetime.datetime.fromtimestamp(bar["t"]).astimezone(eastern)
+                        # remove premarket bars
+                        if dt >= times["00:00"] and dt < times["9:30"]:
+                            continue
+                        bars_swap.append(bar)
+
+                    bars["2nd"][ticker] = pd.DataFrame(bars_swap)
+                    bars["2nd"][ticker] = "bs" = bars["2nd"][ticker]["h"] - bars["2nd"][ticker]["l"]
+
+                # check to see if second bar is good
+                for ticker in tickers["2nd"]:
+                    if ds.has_good_2nd_bar(bars["2nd"][ticker]):
+                        # populate tickers["Ord"]
+                        tickers["Ord"].append(ticker)
 
             check_1000 = True
 

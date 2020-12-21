@@ -14,7 +14,7 @@ def has_igniting_bar(bars_df):
     donchian_low = bars_df["l"].tail(41)[:-1].min()
     donchian_gap = donchian_high - donchian_low
 
-    if bars_df["h"].iloc[-1] > donchian_high + (donchian_channel_size * 0.5):
+    if bars_df["h"].iloc[-1] > donchian_high + (donchian_gap * 0.5):
         return True
     return False
 
@@ -29,7 +29,7 @@ def has_increased_volume(bars_df):
     mean_volume = bars_df["v"][:-1].mean()
     std_volume = bars_df["v"][:-1].std()
 
-    if bars_df["v"].iloc[-1] - mean_volume > 1.5 * std_volume:
+    if bars_df["v"].iloc[-1] - mean_volume > 0.70 * std_volume:
         return True
     return False
 
@@ -38,7 +38,28 @@ def has_positive_move(bars_df):
         return True
     return False
 
+def has_upper_50(bars_df):
+    first_bar = bars_df.iloc[-2]
+    second_bar = bars_df.iloc[-1]
+
+    if second_bar["bs"] / first_bar["bs"] < 0.60:
+        return True
+    return False
+
+def has_realtive_high(bars_df):
+    first_bar = bars_df.iloc[-2]
+    second_bar = bars_df.iloc[-1]
+
+    if abs(first_bar["h"] - second_bar["h"]) < (first_bar["h"] * 0.02):
+        return True
+    return False
+
 def has_good_1st_bar(bars_df):
     if has_igniting_bar(bars_df) and has_wide_bar(bars_df) and has_increased_volume(bars_df) and has_positive_move(bars_df):
+        return True
+    return False
+
+def has_good_2nd_bar(bars_df):
+    if has_upper_50(bars_df) and has_realtive_high(bars_df):
         return True
     return False
