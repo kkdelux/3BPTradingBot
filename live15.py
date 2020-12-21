@@ -4,7 +4,7 @@
 import sys
 # imports
 import logging
-logging.basicConfig(filename='live15.log', format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S %z', level=logging.INFO)
+logging.basicConfig(filename='live15.log', format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S %z', level=logging.DEBUG)
 
 import time
 import pytz
