@@ -219,6 +219,8 @@ while (True):
                     # place order
                     orders_api.create_bracket_order(order["symbol"], order["qty"], order["entry"], order["take"], order["stop"])
 
+                    print(datetime.datetime.now().astimezone(eastern).strftime("%Y %m %d %H:%M:%S") + " - Order placed for " + order["symbol"] + " x" order["qty"])
+
                     orders.append(order)
 
         # update traded
