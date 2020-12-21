@@ -240,4 +240,8 @@ while (True):
 
         orders = []
 
+    # update prev time
+    prevtime = currenttime
+
+    # sleep for 10s
     time.sleep(10)
