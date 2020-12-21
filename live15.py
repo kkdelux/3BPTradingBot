@@ -4,7 +4,7 @@
 import sys
 # imports
 import logging
-logging.basicConfig(filename='live15.log', level=logging.INFO)
+logging.basicConfig(filename='live15.log', format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %H:%M:%S %z', level=logging.INFO)
 
 import time
 import pytz
@@ -82,6 +82,10 @@ bars = {
 # }
 orders = []
 
+# is market open today
+calendar_dt = today.strftime("%Y-%m-%d")
+is_open = calendar_api.get_json({"start": calendar_dt, "end": calendar_dt})[0]["date"] == calendar_dt
+
 # Traded for the day?
 traded = False
 check_930 = False
@@ -113,9 +117,9 @@ while (True):
         check_945 = False
         check_1000 = False
 
-    # determine if the market is open today
-    calendar_dt = today.strftime("%Y-%m-%d")
-    is_open = calendar_api.get_json({"start": calendar_dt, "end": calendar_dt})[0]["date"] == calendar_dt
+        # determine if the market is open today
+        calendar_dt = today.strftime("%Y-%m-%d")
+        is_open = calendar_api.get_json({"start": calendar_dt, "end": calendar_dt})[0]["date"] == calendar_dt
 
     if is_open and not traded:
         # if time is >= 9:30 AM New York time, collect premarket top gainers
