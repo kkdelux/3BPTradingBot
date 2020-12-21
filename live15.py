@@ -84,7 +84,7 @@ check_930 = False
 check_945 = False
 check_1000 = False
 # main loop
-# print(daily_bars_api.get_json({"symbols": ",".join(["AAPL", "TSLA"])}))
+print("Starting Live Trading Application at " + __file__ + "." + __name__)
 while (True):
     # update current time
     currenttime = datetime.datetime.now().astimezone(eastern)
@@ -93,6 +93,8 @@ while (True):
     if currenttime.day != prevtime.day:
         # new day
         today = datetime.datetime.today().astimezone(eastern)
+
+        print("DateTime Event -- Today is: " + today.strftime("%Y %m %d"))
 
         # update times
         times["00:00"] = datetime.datetime.today().astimezone(eastern). replace(hour=0, minute=0, second=0, microsecond=0)
@@ -182,7 +184,7 @@ while (True):
                         bars_swap.append(bar)
 
                     bars["2nd"][ticker] = pd.DataFrame(bars_swap)
-                    bars["2nd"][ticker] = "bs" = bars["2nd"][ticker]["h"] - bars["2nd"][ticker]["l"]
+                    bars["2nd"][ticker]["bs"] = bars["2nd"][ticker]["h"] - bars["2nd"][ticker]["l"]
 
                 # check to see if second bar is good
                 for ticker in tickers["2nd"]:
@@ -219,7 +221,7 @@ while (True):
                     # place order
                     orders_api.create_bracket_order(order["symbol"], order["qty"], order["entry"], order["take"], order["stop"])
 
-                    print(datetime.datetime.now().astimezone(eastern).strftime("%Y %m %d %H:%M:%S") + " - Order placed for " + order["symbol"] + " x" order["qty"])
+                    print(datetime.datetime.now().astimezone(eastern).strftime("%Y %m %d %H:%M:%S") + " - Order placed for " + order["symbol"] + " x" + order["qty"])
 
                     orders.append(order)
 
