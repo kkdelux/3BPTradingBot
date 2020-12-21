@@ -4,7 +4,7 @@
 import sys
 # imports
 import logging
-logging.basicConfig(filename='live15.log', level=logging.DEBUG)
+logging.basicConfig(filename='live15.log', level=logging.INFO)
 
 import time
 import pytz
@@ -229,15 +229,15 @@ while (True):
         traded = True
 
         # clear data structures
-        tickers["Pre"] = tickers["Pre"].clear()
-        tickers["1st"] = tickers["1st"].clear()
-        tickers["2nd"] = tickers["2nd"].clear()
-        tickers["Ord"] = tickers["Ord"].clear()
+        tickers["Pre"] = []
+        tickers["1st"] = []
+        tickers["2nd"] = []
+        tickers["Ord"] = []
 
-        bars["Pre"] = bars["Pre"].clear()
-        bars["1st"] = bars["1st"].clear()
-        bars["2nd"] = bars["2nd"].clear()
+        bars["Pre"] = {}
+        bars["1st"] = {}
+        bars["2nd"] = {}
 
-        orders.clear()
+        orders = []
 
     time.sleep(10)
