@@ -17,6 +17,7 @@ from api import AlpacaPaperDataAPI, AlpacaPaperTradingAPI
 from populator import YahooPopulator
 
 # setup
+logging.info("Starting Live Trading Application at " + __file__)
 
 ## APIs
 
@@ -40,10 +41,10 @@ order_size = 0.05 # Order should be 5% of remaining account balance
 eastern = pytz.timezone('America/New_York')
 today = datetime.datetime.today().astimezone(eastern)
 times = {
-    "00:00": datetime.datetime.today().astimezone(eastern). replace(hour=0, minute=0, second=0, microsecond=0),
+    "00:00": datetime.datetime.today().astimezone(eastern).replace(hour=0, minute=0, second=0, microsecond=0),
     "9:30": datetime.datetime.today().astimezone(eastern).replace(hour=9, minute=30, second=0, microsecond=0),
     "9:45": datetime.datetime.today().astimezone(eastern).replace(hour=9, minute=45, second=0, microsecond=0),
-    "10:00": datetime.datetime.today().astimezone(eastern). replace(hour=10, minute=0, second=0, microsecond=0)
+    "10:00": datetime.datetime.today().astimezone(eastern).replace(hour=10, minute=0, second=0, microsecond=0)
 }
 
 currenttime = datetime.datetime.now().astimezone(eastern)
@@ -92,7 +93,8 @@ check_930 = False
 check_945 = False
 check_1000 = False
 # main loop
-logging.info("Starting Live Trading Application at " + __file__ + "." + __name__)
+logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d") + " Market is: " + "Open" if is_open else "Closed")
+logging.info("DateTime Event -- 9:30 is at: " + times["9:30"].strftime("%Y %m %d %H:%M:%S %z"))
 while (True):
     # update current time
     currenttime = datetime.datetime.now().astimezone(eastern)
@@ -102,13 +104,12 @@ while (True):
         # new day
         today = datetime.datetime.today().astimezone(eastern)
 
-        logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d"))
 
         # update times
-        times["00:00"] = datetime.datetime.today().astimezone(eastern). replace(hour=0, minute=0, second=0, microsecond=0)
+        times["00:00"] = datetime.datetime.today().astimezone(eastern).replace(hour=0, minute=0, second=0, microsecond=0)
         times["9:30"] = datetime.datetime.today().astimezone(eastern).replace(hour=9, minute=30, second=0, microsecond=0)
         times["9:45"] = datetime.datetime.today().astimezone(eastern).replace(hour=9, minute=45, second=0, microsecond=0)
-        times["10:00"] = datetime.datetime.today().astimezone(eastern). replace(hour=10, minute=0, second=0, microsecond=0)
+        times["10:00"] = datetime.datetime.today().astimezone(eastern).replace(hour=10, minute=0, second=0, microsecond=0)
 
         # updated traded for the day
         traded = False
@@ -121,11 +122,15 @@ while (True):
         calendar_dt = today.strftime("%Y-%m-%d")
         is_open = calendar_api.get_json({"start": calendar_dt, "end": calendar_dt})[0]["date"] == calendar_dt
 
+        logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d") + " Market is: " + "Open" if is_open else "Closed")
+
     if is_open and not traded:
         # if time is >= 9:30 AM New York time, collect premarket top gainers
         if currenttime >= times["9:30"] and currenttime < times["9:45"] and not check_930:
             # collect premarket top gainers
             tickers["Pre"] = populator.populate().get_tickers()
+
+            logging.info("Intraday Event -- Found " + len(tickers["Pre"]) + " pre-market gainers")
 
             # scan for gaps
             raw_data = daily_bars_api.get_json({"symbols": ",".join(tickers["Pre"])})
@@ -140,12 +145,14 @@ while (True):
                     # if gap append to tickers["1st"] for the next check
                     tickers["1st"].append(ticker)
 
+            logging.info("Intraday Event -- Found " + len(tickers["1st"]) + " pre-market gainers with gaps")
+
             check_930 = True
 
 
         # if time is >= 9:45 AM New York time, collect first 15 min bar from premarket top gainers
         # determine if any of the premarket gainers have a good first bar
-        if currenttime >= times["9:45"] and currenttime < times["10:00"] and not check_945:
+        if currenttime >= times["9:45"] and currenttime < times["10:00"] and not check_945 and check_930:
             # determine if any of the premarket tickers have a good first bar
             if tickers["1st"]:
                 # collect 15 min bars
@@ -168,11 +175,13 @@ while (True):
                     if ds.has_good_1st_bar(bars["1st"][ticker]):
                         tickers["2nd"].append(ticker)
 
+                logging.info("Intraday Event -- Found " + len(tickers["2nd"]) + " symbols with a good 1st bar")
+
             check_945 = True
 
         # if time is >= 10:00 AM New York time, collect second 15 min bar from premarket top gainers
         # determine if any of the premarket gainers with a good first bar, have a good second bar
-        if currenttime >= times["10:00"]:
+        if currenttime >= times["10:00"] and check_945:
             # determine if tickers with good first bar have good second bar
             if tickers["2nd"]:
                 # collect second 15 min bar
@@ -195,6 +204,8 @@ while (True):
                     if ds.has_good_2nd_bar(bars["2nd"][ticker]):
                         # populate tickers["Ord"]
                         tickers["Ord"].append(ticker)
+
+                logging.info("Intraday Event -- Found " + len(tickers["Ord"]) + " symbols with a good 2nd bar")
 
             check_1000 = True
 
@@ -225,7 +236,7 @@ while (True):
                     # place order
                     orders_api.create_bracket_order(order["symbol"], order["qty"], order["entry"], order["take"], order["stop"])
 
-                    logging.info(datetime.datetime.now().astimezone(eastern).strftime("%Y %m %d %H:%M:%S") + " - Order placed for " + order["symbol"] + " x" + order["qty"])
+                    logging.info("Intraday Event -- Order placed for " + order["symbol"] + " x" + order["qty"])
 
                     orders.append(order)
 
