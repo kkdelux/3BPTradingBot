@@ -127,6 +127,7 @@ while (True):
     if is_open and not traded:
         # if time is >= 9:30 AM New York time, collect premarket top gainers
         if currenttime >= times["9:30"] and currenttime < times["9:45"] and not check_930:
+            logging.info("DateTime Event -- Getting Daily Gainers")
             # collect premarket top gainers
             tickers["Pre"] = populator.populate().get_tickers()
 
@@ -153,6 +154,7 @@ while (True):
         # if time is >= 9:45 AM New York time, collect first 15 min bar from premarket top gainers
         # determine if any of the premarket gainers have a good first bar
         if currenttime >= times["9:45"] and currenttime < times["10:00"] and not check_945 and check_930:
+            logging.info("DateTime Event -- Processing Symbols with good gaps")
             # determine if any of the premarket tickers have a good first bar
             if tickers["1st"]:
                 # collect 15 min bars
@@ -182,6 +184,7 @@ while (True):
         # if time is >= 10:00 AM New York time, collect second 15 min bar from premarket top gainers
         # determine if any of the premarket gainers with a good first bar, have a good second bar
         if currenttime >= times["10:00"] and check_945:
+            logging.info("DateTime Event -- Processing Symbols with a good first bar")
             # determine if tickers with good first bar have good second bar
             if tickers["2nd"]:
                 # collect second 15 min bar
@@ -211,6 +214,7 @@ while (True):
 
         # if any have a good second bar, determine entry point
         if tickers["Ord"]:
+            logging.info("DateTime Event -- Processing Symbols with a good second bar")
             for ticker in tickers["Ord"]:
                 # get balance
                 balance = float(account_api.get_json()["cash"])
@@ -258,5 +262,5 @@ while (True):
     # update prev time
     prevtime = currenttime
 
-    # sleep for 10s
-    time.sleep(10)
+    # sleep for 5s
+    time.sleep(5)
