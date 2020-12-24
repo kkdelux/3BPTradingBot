@@ -128,7 +128,6 @@ while (True):
         logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d") + " Market is: " + "Open" if is_open else "Closed")
 
     if is_open and not traded:
-        logging.debug("DateTime Event -- Time to trade")
         # if time is >= 9:30 AM New York time, collect premarket top gainers
         if (currenttime >= times["9:30"]) and (currenttime < times["9:45"]) and (not check_930):
             logging.debug("DateTime Event -- Getting Daily Gainers")
