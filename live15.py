@@ -92,6 +92,7 @@ traded = False
 check_930 = False
 check_945 = False
 check_1000 = False
+ordered = False
 # main loop
 logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d") + " Market is: " + "Open" if is_open else "Closed")
 logging.info("DateTime Event -- 9:30 is at: " + times["9:30"].strftime("%Y %m %d %H:%M:%S %z"))
@@ -118,6 +119,7 @@ while (True):
         check_930 = False
         check_945 = False
         check_1000 = False
+        ordered = False
 
         # determine if the market is open today
         calendar_dt = today.strftime("%Y-%m-%d")
@@ -246,8 +248,11 @@ while (True):
 
                     orders.append(order)
 
+            ordered = True
+
         # update traded
-        traded = True
+        if check_930 and check_945 and check_1000 and ordered:
+            traded = True
 
         # clear data structures
         tickers["Pre"] = []
