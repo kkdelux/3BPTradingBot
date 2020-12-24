@@ -95,6 +95,7 @@ check_1000 = False
 # main loop
 logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d") + " Market is: " + "Open" if is_open else "Closed")
 logging.info("DateTime Event -- 9:30 is at: " + times["9:30"].strftime("%Y %m %d %H:%M:%S %z"))
+
 while (True):
     # update current time
     currenttime = datetime.datetime.now().astimezone(eastern)
@@ -125,8 +126,9 @@ while (True):
         logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d") + " Market is: " + "Open" if is_open else "Closed")
 
     if is_open and not traded:
+        logging.debug("DateTime Event -- Time to trade")
         # if time is >= 9:30 AM New York time, collect premarket top gainers
-        if currenttime >= times["9:30"] and currenttime < times["9:45"] and not check_930:
+        if (currenttime >= times["9:30"]) and (currenttime < times["9:45"]) and (not check_930):
             logging.debug("DateTime Event -- Getting Daily Gainers")
             # collect premarket top gainers
             tickers["Pre"] = populator.populate().get_tickers()
@@ -261,6 +263,3 @@ while (True):
 
     # update prev time
     prevtime = currenttime
-
-    # sleep for 5s
-    time.sleep(5)
