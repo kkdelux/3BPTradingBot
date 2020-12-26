@@ -151,12 +151,15 @@ while (True):
 
             logging.info("Intraday Event -- Found " + len(tickers["1st"]) + " pre-market gainers with gaps")
 
+            tickers["Pre"] = []
+            bars["Pre"] = []
+
             check_930 = True
 
 
         # if time is >= 9:45 AM New York time, collect first 15 min bar from premarket top gainers
         # determine if any of the premarket gainers have a good first bar
-        if currenttime >= times["9:45"] and currenttime < times["10:00"] and not check_945 and check_930:
+        if currenttime >= times["9:45"] and currenttime < times["10:00"] and (not check_945) and check_930:
             logging.debug("DateTime Event -- Processing Symbols with good gaps")
             # determine if any of the premarket tickers have a good first bar
             if tickers["1st"]:
@@ -181,6 +184,9 @@ while (True):
                         tickers["2nd"].append(ticker)
 
                 logging.info("Intraday Event -- Found " + len(tickers["2nd"]) + " symbols with a good 1st bar")
+
+            tickers["1st"] = []
+            bars["1st"] = []
 
             check_945 = True
 
@@ -212,6 +218,8 @@ while (True):
                         tickers["Ord"].append(ticker)
 
                 logging.info("Intraday Event -- Found " + len(tickers["Ord"]) + " symbols with a good 2nd bar")
+
+            tickers["2nd"] = []
 
             check_1000 = True
 
@@ -248,6 +256,7 @@ while (True):
                     orders.append(order)
 
             tickers["Ord"] = []
+            bars["2nd"] = []
 
             ordered = True
 
@@ -255,14 +264,6 @@ while (True):
         if check_930 and check_945 and check_1000 and ordered:
             traded = True
             orders = []
-
-        # clear data structures
-        if check_930:
-            tickers["Pre"] = []
-        if check_945:
-            tickers["1st"] = []
-        if check_1000:
-            tickers["2nd"] = []
 
         if check_930:
             bars["Pre"] = {}
