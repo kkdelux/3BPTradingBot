@@ -94,7 +94,7 @@ check_945 = False
 check_1000 = False
 ordered = False
 # main loop
-logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d") + " Market is: " + "Open" if is_open else "Closed")
+logging.info("DateTime Event -- Today is: " + today.strftime("%Y-%m-%d") + " Market is: " + ("Open" if is_open else "Closed"))
 logging.info("DateTime Event -- 9:30 is at: " + times["9:30"].strftime("%Y %m %d %H:%M:%S %z"))
 
 while (True):
@@ -125,7 +125,7 @@ while (True):
         calendar_dt = today.strftime("%Y-%m-%d")
         is_open = calendar_api.get_json({"start": calendar_dt, "end": calendar_dt})[0]["date"] == calendar_dt
 
-        logging.info("DateTime Event -- Today is: " + today.strftime("%Y %m %d") + " Market is: " + "Open" if is_open else "Closed")
+        logging.info("DateTime Event -- Today is: " + today.strftime("%Y-%m-%d") + " Market is: " + ("Open" if is_open else "Closed"))
 
     if is_open and not traded:
         # if time is >= 9:30 AM New York time, collect premarket top gainers
@@ -247,23 +247,30 @@ while (True):
 
                     orders.append(order)
 
+            tickers["Ord"] = []
+
             ordered = True
 
         # update traded
         if check_930 and check_945 and check_1000 and ordered:
             traded = True
+            orders = []
 
         # clear data structures
-        tickers["Pre"] = []
-        tickers["1st"] = []
-        tickers["2nd"] = []
-        tickers["Ord"] = []
+        if check_930:
+            tickers["Pre"] = []
+        if check_945:
+            tickers["1st"] = []
+        if check_1000:
+            tickers["2nd"] = []
 
-        bars["Pre"] = {}
-        bars["1st"] = {}
-        bars["2nd"] = {}
+        if check_930:
+            bars["Pre"] = {}
+        if check_945:
+            bars["1st"] = {}
+        if check_1000 and ordered:
+            bars["2nd"] = {}
 
-        orders = []
 
     # update prev time
     prevtime = currenttime
