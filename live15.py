@@ -134,7 +134,7 @@ while (True):
             # collect premarket top gainers
             tickers["Pre"] = populator.populate().get_tickers()
 
-            logging.info("Intraday Event -- Found " + len(tickers["Pre"]) + " pre-market gainers")
+            logging.info("Intraday Event -- Found " + str(len(tickers["Pre"])) + " pre-market gainers")
 
             # scan for gaps
             raw_data = daily_bars_api.get_json({"symbols": ",".join(tickers["Pre"])})
@@ -149,7 +149,7 @@ while (True):
                     # if gap append to tickers["1st"] for the next check
                     tickers["1st"].append(ticker)
 
-            logging.info("Intraday Event -- Found " + len(tickers["1st"]) + " pre-market gainers with gaps")
+            logging.info("Intraday Event -- Found " + str(len(tickers["1st"])) + " pre-market gainers with gaps")
 
             tickers["Pre"] = []
             bars["Pre"] = []
@@ -183,7 +183,7 @@ while (True):
                     if ds.has_good_1st_bar(bars["1st"][ticker]):
                         tickers["2nd"].append(ticker)
 
-                logging.info("Intraday Event -- Found " + len(tickers["2nd"]) + " symbols with a good 1st bar")
+                logging.info("Intraday Event -- Found " + str(len(tickers["2nd"])) + " symbols with a good 1st bar")
 
             tickers["1st"] = []
             bars["1st"] = []
@@ -217,7 +217,7 @@ while (True):
                         # populate tickers["Ord"]
                         tickers["Ord"].append(ticker)
 
-                logging.info("Intraday Event -- Found " + len(tickers["Ord"]) + " symbols with a good 2nd bar")
+                logging.info("Intraday Event -- Found " + str(len(tickers["Ord"])) + " symbols with a good 2nd bar")
 
             tickers["2nd"] = []
 
@@ -251,7 +251,7 @@ while (True):
                     # place order
                     orders_api.create_bracket_order(order["symbol"], order["qty"], order["entry"], order["take"], order["stop"])
 
-                    logging.info("Intraday Event -- Order placed for " + order["symbol"] + " x" + order["qty"])
+                    logging.info("Intraday Event -- Order placed for " + order["symbol"] + " x" + str(order["qty"]))
 
                     orders.append(order)
 
