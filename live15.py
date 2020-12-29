@@ -135,6 +135,8 @@ while (True):
             tickers["Pre"] = populator.populate().get_tickers()
 
             logging.info("Intraday Event -- Found " + str(len(tickers["Pre"])) + " pre-market gainers")
+            print("Premarket Tickers:")
+            print(tickers["Pre"])
 
             # scan for gaps
             raw_data = daily_bars_api.get_json({"symbols": ",".join(tickers["Pre"])})

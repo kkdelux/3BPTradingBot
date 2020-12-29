@@ -74,6 +74,10 @@ class YahooPopulator(Populator):
 
             temp_tickers = []
             for quote in quotes:
+                if "-" in quote["symbol"]:
+                    continue
+                if "." in quote["symbol"]:
+                    continue
                 if quote["fullExchangeName"] != "Other OTC":
                     self.tickers.append(quote["symbol"])
 
