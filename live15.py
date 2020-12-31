@@ -194,7 +194,7 @@ while (True):
 
         # if time is >= 10:00 AM New York time, collect second 15 min bar from premarket top gainers
         # determine if any of the premarket gainers with a good first bar, have a good second bar
-        if currenttime >= times["10:00"] and check_945:
+        if currenttime >= times["10:00"] and (not check_1000) and check_945:
             logging.debug("DateTime Event -- Processing Symbols with a good first bar")
             # determine if tickers with good first bar have good second bar
             if tickers["2nd"]:
