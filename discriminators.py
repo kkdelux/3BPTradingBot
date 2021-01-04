@@ -38,11 +38,22 @@ def has_positive_move(bars_df):
         return True
     return False
 
-def has_upper_50(bars_df):
+def has_relative_size(bars_df):
     first_bar = bars_df.iloc[-2]
     second_bar = bars_df.iloc[-1]
 
     if second_bar["bs"] / first_bar["bs"] < 0.60:
+        return True
+    return False
+
+def has_upper_50(bars_df):
+    first_bar = bars_df.iloc[-2]
+    second_bar = bars_df.iloc[-1]
+
+    first_bar_middle = (first_bar["h"] + first_bar["l"]) / 2
+    second_bar_middle = (second_bar["h"] + second_bar["l"]) / 2
+
+    if second_bar_middle > first_bar_middle:
         return True
     return False
 
@@ -55,11 +66,11 @@ def has_realtive_high(bars_df):
     return False
 
 def has_good_1st_bar(bars_df):
-    if has_igniting_bar(bars_df) and has_wide_bar(bars_df) and has_increased_volume(bars_df) and has_positive_move(bars_df):
+    if has_igniting_bar(bars_df) and has_wide_bar(bars_df) and has_positive_move(bars_df):
         return True
     return False
 
 def has_good_2nd_bar(bars_df):
-    if has_upper_50(bars_df) and has_realtive_high(bars_df):
+    if has_relative_size(bars_df) and has_upper_50(bars_df) and has_realtive_high(bars_df):
         return True
     return False

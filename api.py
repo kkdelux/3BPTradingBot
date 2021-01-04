@@ -85,7 +85,7 @@ class AlpacaPaperTradingAPI(AlpacaAPI):
             "symbol": symbol,
             "qty": qty,
             "side": "buy",
-            "type": "limit",
+            "type": "stop",
             "time_in_force": "day",
             "limit_price": entry,
             "order_class": "bracket",

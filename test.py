@@ -75,11 +75,12 @@ class CYBR_12_18_2020_Open(unittest.TestCase):
     def test_good_first_bar(self):
         self.assertTrue(ds.has_igniting_bar(self.first_bar_bars))
         self.assertTrue(ds.has_wide_bar(self.first_bar_bars))
-        self.assertTrue(ds.has_increased_volume(self.first_bar_bars))
+        # self.assertTrue(ds.has_increased_volume(self.first_bar_bars))
         self.assertTrue(ds.has_positive_move(self.first_bar_bars))
         self.assertTrue(ds.has_good_1st_bar(self.first_bar_bars))
 
     def test_good_second_bar(self):
+        self.assertTrue(ds.has_relative_size(self.second_bar_bars))
         self.assertTrue(ds.has_upper_50(self.second_bar_bars))
         self.assertTrue(ds.has_realtive_high(self.second_bar_bars))
         self.assertTrue(ds.has_good_2nd_bar(self.second_bar_bars))
