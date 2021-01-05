@@ -251,7 +251,7 @@ while (True):
                         "stop"      : str(round(stop, 2))
                     }
                     # place order
-                    orders_api.create_bracket_order(order["symbol"], order["qty"], order["entry"], order["take"], order["stop"])
+                    logging.debug(orders_api.create_bracket_order(order["symbol"], order["qty"], order["entry"], order["take"], order["stop"]))
 
                     logging.info("Intraday Event -- Order placed for " + order["symbol"] + " x" + str(order["qty"]))
 
