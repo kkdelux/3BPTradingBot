@@ -87,7 +87,7 @@ class AlpacaPaperTradingAPI(AlpacaAPI):
             "side": "buy",
             "type": "stop",
             "time_in_force": "day",
-            "limit_price": entry,
+            "stop_price": entry,
             "order_class": "bracket",
             "take_profit": {
                 "limit_price": take
