@@ -1,5 +1,7 @@
 # Live.py
 # Main application file for running application in cloud on 15 min 3BP timeframe
+# With a small change from original file in that we are checking top gainers at 9:45
+# instead of market open to try to identify symbols with good first bars at a higher rate
 
 import sys
 # imports
@@ -129,7 +131,7 @@ while (True):
 
     if is_open and not traded:
         # if time is >= 9:30 AM New York time, collect premarket top gainers
-        if (currenttime >= times["9:30"]) and (currenttime < times["9:45"]) and (not check_930):
+        if (currenttime >= times["9:45"]) and (currenttime < times["10:00"]) and (not check_930):
             logging.debug("DateTime Event -- Getting Daily Gainers")
             # collect premarket top gainers
             tickers["Pre"] = populator.populate().get_tickers()
