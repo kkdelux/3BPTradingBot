@@ -234,7 +234,7 @@ while (True):
                 # get balance
                 balance = float(account_api.get_json()["cash"])
                 # determine entry point
-                high = bars["2nd"][ticker]["h"].tail(2).max()
+                # entry = bars["2nd"][ticker]["h"].tail(2).max()
                 high_100 = int(high * 100)
                 entry = (high_100 + (5 - (high_100 % 5))) / 100
                 # determine stop
