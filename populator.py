@@ -82,3 +82,9 @@ class YahooPopulator(Populator):
                     self.tickers.append(quote["symbol"])
 
         return self
+
+    def reset(self):
+
+        self.tickers = []
+
+        return self

@@ -135,6 +135,7 @@ while (True):
             logging.debug("DateTime Event -- Getting Daily Gainers")
             # collect premarket top gainers
             tickers["Pre"] = populator.populate().get_tickers()
+            populator.reset()
 
             logging.info("Intraday Event -- Found " + str(len(tickers["Pre"])) + " pre-market gainers")
             print("Premarket Tickers:")
@@ -249,11 +250,12 @@ while (True):
                         "symbol"    : ticker,
                         "qty"       : qty,
                         "entry"     : str(round(entry, 2)),
+                        "limit"     : str(round(entry*1.01, 2)),
                         "take"      : str(round(take, 2)),
                         "stop"      : str(round(stop, 2))
                     }
                     # place order
-                    orders_api.create_bracket_order(order["symbol"], order["qty"], order["entry"], order["take"], order["stop"])
+                    orders_api.create_bracket_order(order["symbol"], order["qty"], order["entry"], order["limit"], order["take"], order["stop"])
 
                     logging.info("Intraday Event -- Order placed for " + order["symbol"] + " x" + str(order["qty"]))
 
